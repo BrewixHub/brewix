@@ -1,5 +1,5 @@
 #!/bin/bash
 #path/brewix
 
-. brewixshell
+. brewixrc
 ruby $BREWIXBIN/brewix.rb "$@"

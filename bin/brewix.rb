@@ -39,7 +39,6 @@ class Brewix
     if File.exist?(install_file)
       config = File.read(install_file).split("\n").map { |line| line.split("=", 2) }.to_h
       package_name = config["NAME"] || package_name
-      build_dir = config["BUILDDIR"] || "#{package_git_path}/build"
       init_file = config["INIT"] || "N/A"
 
       # Store paths in environment variables
@@ -55,9 +54,22 @@ class Brewix
       File.write("#{package_install_path}/.brewix-init", init_path) if init_file != "N/A"
 
       puts "#{package_name} has been installed!"
-      puts "Run it using: ruby #{init_path}" if init_file != "N/A"
+      puts "Run it using: brewix run #{package_name}" if init_file != "N/A"
     else
       puts "Error: install.txt missing for #{package_name}!"
+    end
+  end
+
+  def run(package_name)
+    package_path = "#{@brewix_root}/#{package_name}"
+    init_file = "#{package_path}/.brewix-init"
+
+    if File.exist?(init_file)
+      command = File.read(init_file).strip
+      puts "Running #{package_name}..."
+      exec(command)
+    else
+      puts "Error: No initialization script found for #{package_name}!"
     end
   end
 
@@ -78,6 +90,8 @@ else
   case ARGV[0]
   when "install"
     brewix.install(ARGV[1])
+  when "run"
+    brewix.run(ARGV[1])
   when "list"
     brewix.list
   else

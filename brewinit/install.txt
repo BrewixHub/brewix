@@ -4,4 +4,4 @@ MAINTAINER=leon8326
 REPOSITORY=BrewixHub
 PREBUILT=yes
 BUILDDIR=$BREVARGIT/
-INIT=$BREVARPKG/bin/brewix.rb
+INIT=bin/brewix.rb

@@ -1,26 +1,70 @@
 # bin/brewix.rb
 require 'git'
+require 'fileutils'
 
 class Brewix
-  def initialize
+  def initialize(user_mode)
     @repo_base = "https://github.com/BrewixHub"
+    @brewix_root = ENV['BREVARPKG'] || "/home/brewix/pkg"
+    @brewix_git_root = ENV['BREVARGIT'] || "/home/brewix/git"
+
+    # If using --user mode, change paths
+    if user_mode
+      @brewix_root = ENV['USRWIXPKG'] || "#{Dir.home}/.brewix/pkg"
+      @brewix_git_root = ENV['USRWIXGIT'] || "#{Dir.home}/.brewix/git"
+    end
+
+    # Ensure directories exist
+    FileUtils.mkdir_p(@brewix_root)
+    FileUtils.mkdir_p(@brewix_git_root)
   end
 
   def install(package_name)
     package_repo = "#{@repo_base}/#{package_name}.git"
-    puts "Installing package: #{package_name} from #{package_repo}"
-    
-    # Clone the package repository
-    Git.clone(package_repo, "#{package_name}")
+    package_git_path = "#{@brewix_git_root}/#{package_name}"
+    package_install_path = "#{@brewix_root}/#{package_name}"
 
-    puts "#{package_name} has been installed!"
+    puts "Installing package: #{package_name} from #{package_repo}"
+
+    # Clone the package repository
+    if Dir.exist?(package_git_path)
+      puts "Updating existing package repo..."
+      Git.open(package_git_path).pull
+    else
+      Git.clone(package_repo, package_git_path)
+    end
+
+    # Read metadata
+    install_file = "#{package_git_path}/brewinit/install.txt"
+    if File.exist?(install_file)
+      config = File.read(install_file).split("\n").map { |line| line.split("=", 2) }.to_h
+      package_name = config["NAME"] || package_name
+      build_dir = config["BUILDDIR"] || "#{package_git_path}/build"
+      init_file = config["INIT"] || "N/A"
+
+      # Store paths in environment variables
+      ENV['BREVARGIT'] = package_git_path
+      ENV['BREVARPKG'] = package_install_path
+
+      # Copy package to installation path
+      FileUtils.mkdir_p(package_install_path)
+      FileUtils.cp_r("#{package_git_path}/.", package_install_path)
+
+      # Save INIT path for future execution
+      init_path = "#{package_install_path}/#{init_file}"
+      File.write("#{package_install_path}/.brewix-init", init_path) if init_file != "N/A"
+
+      puts "#{package_name} has been installed!"
+      puts "Run it using: ruby #{init_path}" if init_file != "N/A"
+    else
+      puts "Error: install.txt missing for #{package_name}!"
+    end
   end
 
   def list
     puts "Listing installed packages..."
-    # List installed packages (could be just a directory listing for now)
-    installed = Dir.glob('*')
-    installed.each { |pkg| puts pkg }
+    installed = Dir.glob("#{@brewix_root}/*").select { |f| File.directory?(f) }
+    installed.each { |pkg| puts File.basename(pkg) }
   end
 end
 
@@ -28,7 +72,9 @@ end
 if ARGV.empty?
   puts "Usage: brewix <command> [options]"
 else
-  brewix = Brewix.new
+  user_mode = (ARGV[1] == "--user")
+  brewix = Brewix.new(user_mode)
+
   case ARGV[0]
   when "install"
     brewix.install(ARGV[1])

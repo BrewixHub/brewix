@@ -1,0 +1,9 @@
+NAME="brewix"
+VERSION=0.2
+MAINTAINER="leon8326"
+SERVER="github"
+REMOTE="BrewixHub"
+REPOSITORY="brewix"
+INSTALL="https://archive.leon8326.org/software/brewix/install.sh"
+SHELL="sudo bash"
+PATH="path"

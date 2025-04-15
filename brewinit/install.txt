@@ -1,7 +1,7 @@
-NAME=brewix
+NAME="brewix"
 VERSION=0.2
-MAINTAINER=leon8326
-REPOSITORY=BrewixHub
-PREBUILT=yes
-BUILDDIR=$BREVARGIT/
-INIT=bin/brewix.rb
+MAINTAINER="leon8326"
+REPOSITORY="BrewixHub"
+PREBUILT="yes"
+BUILDDIR="$BREVARGIT/"
+INIT="bin/brewix.rb"

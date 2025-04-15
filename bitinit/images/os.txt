@@ -1,0 +1,8 @@
+SYSTEM="archlinux"
+PACKAGES=(
+
+"git"
+"ruby"
+
+)
+HOSTNAME="brewix"

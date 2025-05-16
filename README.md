@@ -6,7 +6,7 @@ You can install using curl by running:
 ```
 curl https://archive.leon8326.org/software/brewix/install.sh | sudo bash
 ```
-### Bitey
+### 🍫 Bitey
 You can install as a Bit Package using Bitey by running:
 ```
 sudo bitey install main brewix
